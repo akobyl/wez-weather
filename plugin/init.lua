@@ -8,6 +8,7 @@
 ---     location = "Boston, MA",   -- city name, "lat,lon", or US 5-digit zip code
 ---     units = "fahrenheit",      -- "fahrenheit" | "celsius"
 ---     update_interval = 600,     -- seconds between refreshes (default 600 = 10 min)
+---     show_icon = true,          -- set false for a plain-text-only widget
 ---   })
 ---
 ---   tabline.setup({
@@ -24,6 +25,7 @@ local config = {
 	location = "New York",
 	units = "fahrenheit",
 	update_interval = 600,
+	show_icon = true,
 }
 
 local state = {
@@ -172,7 +174,7 @@ end
 local function refresh()
 	ensure_location()
 	if not state.lat or not state.lon then
-		state.text = wezterm.nerdfonts.md_weather_cloudy_alert .. " --"
+		state.text = config.show_icon and (wezterm.nerdfonts.md_weather_cloudy_alert .. " --") or "--"
 		return
 	end
 
@@ -180,19 +182,23 @@ local function refresh()
 	if not temp then
 		-- Keep the last known-good text on a transient failure.
 		if state.text == "" then
-			state.text = wezterm.nerdfonts.md_weather_cloudy_alert .. " --"
+			state.text = config.show_icon and (wezterm.nerdfonts.md_weather_cloudy_alert .. " --") or "--"
 		end
 		return
 	end
 
-	local icon = icon_for_code(code)
 	local unit_symbol = config.units == "celsius" and "°C" or "°F"
-	state.text = string.format("%s %.0f%s", icon, temp, unit_symbol)
+	if config.show_icon then
+		local icon = icon_for_code(code)
+		state.text = string.format("%s %.0f%s", icon, temp, unit_symbol)
+	else
+		state.text = string.format("%.0f%s", temp, unit_symbol)
+	end
 end
 
 --- Configure the plugin. Call this once, before adding `M.component` to a
 --- tabline/status bar section.
----@param opts? { location?: string, units?: string, update_interval?: number }
+---@param opts? { location?: string, units?: string, update_interval?: number, show_icon?: boolean }
 function M.setup(opts)
 	opts = opts or {}
 	if opts.location then
@@ -201,6 +207,9 @@ function M.setup(opts)
 	config.units = normalize_units(opts.units or config.units)
 	if opts.update_interval then
 		config.update_interval = opts.update_interval
+	end
+	if opts.show_icon ~= nil then
+		config.show_icon = opts.show_icon
 	end
 
 	-- Force re-geocoding and an immediate refresh on (re)configure.

@@ -33,6 +33,7 @@ weather.setup({
   location = "Boston, MA", -- city name, "lat,lon", or US zip code
   units = "fahrenheit",    -- "fahrenheit" | "celsius"
   update_interval = 600,   -- seconds between refreshes
+  show_icon = true,        -- set false for a plain-text-only widget (e.g. "72°F")
 })
 ```
 
@@ -60,6 +61,7 @@ right-status, call `weather.component(window)` from your own handler.
 | `location`         | string   | `"New York"` | City name, US zip code, or `"lat,lon"`            |
 | `units`             | string   | `"fahrenheit"` | `"fahrenheit"` or `"celsius"`                   |
 | `update_interval`   | number   | `600`        | Seconds between API refreshes                     |
+| `show_icon`         | boolean  | `true`       | Prefix a Nerd Font weather icon; `false` for plain text |
 
 Geocoding (turning `location` into coordinates) happens once and is cached for
 the life of the WezTerm process; only the weather fetch repeats on
